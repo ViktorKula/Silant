@@ -1,0 +1,16 @@
+Manager
+manager_1:6uzNpriB
+
+Client
+client_1:6uzNpriZ (Трудников ИП)
+client_2:6uzNpriC (ООО "ФПК21")
+client_3:6yzNpriC (ООО "МНС77")
+client_4:7yzNpriC (ООО "Ранский ЛПХ")
+client_5:7zzNpriC (ООО "РМК")
+client_6:7zxNpriC (АО "Зандер")
+client_7:7zcNpriC (ООО "Комплект-Поставка")
+
+Service
+service_organization_1:6uzNpriX (ООО Промышленная техника)
+service_organization_2:6uzNpriM (ООО Силант)
+service_organization_3:6uzNprij (ООО ФНС)

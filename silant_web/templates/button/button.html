@@ -1,0 +1,8 @@
+{% load static %}
+
+<button class="summary-button {{ object_class }}"
+    data-object-id="{{ object_id }}"
+    title="Просмотреть информацию">
+        <span class="back-href bold">{{ object_name }}</span>
+        <img src="{% static 'img/eye.svg' %}" alt="Просмотреть" width="16" height="16" class="mg-lft">
+</button>

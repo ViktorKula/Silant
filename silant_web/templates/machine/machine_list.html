@@ -1,0 +1,114 @@
+{% extends 'base.html' %} 
+{% block title %} Мой силант {% endblock title %} 
+{% block content %}
+{% load static %}
+<main class="main">
+    <div class="result-wrapper">
+        <h1>Информация о комплектации и технических характеристиках вашей техники</h1>
+        {% include 'tabs.html' with active_tab='general' %}
+        {% if machines %}
+        {% include 'forms/filter_form.html' %}
+        <div class="adaptive-table-wrapper">
+            <table class="adaptive-table">
+                <thead>
+                    <tr>
+                        <th>Зав. № машины</th>
+                        <th>Модель техники</th>
+                        <th>Модель двигателя</th>
+                        <th>Зав № номер двигателя</th>
+                        <th>Модель трансмиссии</th>
+                        <th>Зав. № трансмиссии</th>
+                        <th>Модель ведущего моста</th>
+                        <th>Зав. № ведущего моста</th>
+                        <th>Модель управляемого моста</th>
+                        <th>Зав. № управляемого моста</th>
+                        <th>Договор поставки №, дата</th>
+                        <th>Дата отгрузки с завода</th>
+                        <th>Грузополучатель (конечный потребитель)</th>
+                        <th>Адрес доставки (эксплуатации)</th>
+                        <th>Комплектация (доп. опции)</th>
+                        <th>Клиент</th>
+                        <th>Сервисная компания</th>
+                        {% if can_update_machine %}
+                        <th>Изменить</th>
+                        {% endif %}
+                        {% if can_delete_machine %}
+                        <th>Удалить</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for machine in filter.qs %}
+                    <tr>
+                        <td>
+                            <div class="summary-button">
+                                <a href="{% url 'machine_detail' machine.id %}" class="back-href">{{ machine.serial_number_of_machine }}</a>
+                                <img src="{% static 'img/eye.svg' %}" alt="Просмотреть" width="16" height="16" class="mg-lft">
+                            </div>
+                        </td>
+                        <td>
+                            {% include 'button/button.html' with object_class='model-of-equipment' object_id=machine.model_of_equipment.id object_name=machine.model_of_equipment %}
+                        </td>
+                        <td>
+                            {% include 'button/button.html' with object_class='model-of-engine' object_id=machine.model_of_engine.id object_name=machine.model_of_engine %}
+                        </td>
+                        <td>{{ machine.serial_number_of_engine }}</td>
+                        <td>
+                            {% include 'button/button.html' with object_class='model-of-transmission' object_id=machine.transmission_model.id object_name=machine.transmission_model %}
+                        </td>
+                        <td>{{ machine.serial_number_of_transmission }}</td>
+                        <td>
+                            {% include 'button/button.html' with object_class='model-of-drive-axle' object_id=machine.drive_axle_model.id object_name=machine.drive_axle_model %}
+                        </td>
+                        <td>{{ machine.serial_number_of_drive_axle }}</td>
+                        <td>
+                            {% include 'button/button.html' with object_class='model-of-steering-axle' object_id=machine.steering_axle_model.id object_name=machine.steering_axle_model %}
+                        </td>
+                        <td>{{ machine.serial_number_of_steering_axle }}</td>
+                        <td>{{ machine.supply_contract_number_and_date }}</td>
+                        <td>{{ machine.date_shipped_from_factory }}</td>
+                        <td>{{ machine.recipient }}</td>
+                        <td>{{ machine.delivery_address }}</td>
+                        <td>{{ machine.equipment }}</td>
+                        <td>
+                            {% include 'button/button.html' with object_class='client-info' object_id=machine.client.id object_name=machine.client %}
+                        </td>
+                        <td>
+                            {% include 'button/button.html' with object_class='service-company-info' object_id=machine.service_company.id object_name=machine.service_company %}
+                        </td>
+                        {% if can_update_machine %}
+                        <td>
+                            <a href="{% url 'machine_update' machine.id %}" class="edit-icon" title="Изменить">
+                                <img src="{% static 'img/edit.svg' %}" alt="Изменить" width="24" height="24">
+                            </a>
+                        </td>
+                        {% endif %}
+                        {% if can_delete_machine %}
+                         <td>
+                            {% csrf_token %}
+                            <button class="delete-icon delete-machine-btn" 
+                                data-machine-id="{{ machine.id }}"
+                                data-machine-token="{{ csrf_token }}"
+                                title="Удалить"
+                                >
+                                <img src="{% static 'img/delete.svg' %}" alt="Удалить" width="24" height="24">
+                            </button>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'modals/modal_delete.html' with modal_title='Удалить машину' %}
+        {% include 'modals/modal_info.html' %}
+        {% else %}
+        <div class="result-wrapper">
+            <span class="info-if-doesnt-exists">У вас нет машин</span>
+        </div>
+        {% endif %}
+        {% if can_add_machine %}
+            <button class="sign-button" id="create_machine">Создать</button>
+        {% endif %}  
+</main>
+{% endblock content %} 

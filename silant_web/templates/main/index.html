@@ -1,0 +1,69 @@
+{% extends 'base.html' %} 
+{% block title %} Мой силант {% endblock title %} 
+{% block content %}
+{% load static %}
+<main class="main">
+  <h1>Проверьте комплектацию и технически характеристики техники Силант</h1>
+  <form action="" method="POST" class="get-machine">
+    {% csrf_token %}
+    <div class="input-and-label">
+      <label for="serial">Заводской номер:</label>
+      <input type="text" id="serial" name="serial_number" />
+    </div>
+    <div class="submit-form-button">
+      <button type="submit" class="sign-button">Поиск</button>
+    </div>
+  </form>
+  <div class="result-wrapper">
+        <h1>Информация о комплектации и технических характеристиках вашей техники</h1>
+        {% if machine %}
+        <div class="adaptive-table-wrapper">
+            <table class="adaptive-table">
+                <tr>
+                    <th>Зав. № машины</th>
+                    <th>Модель техники</th>
+                    <th>Модель двигателя</th>
+                    <th>Зав. № двигателя</th>
+                    <th>Модель трансмиссии</th>
+                    <th>Зав. № трансмиссии</th>
+                    <th>Модель ведущего моста</th>
+                    <th>Зав. № ведущего моста</th>
+                    <th>Модель управляемого моста</th>
+                    <th>Зав. № управляемого моста</th>
+                </tr>
+                <tr>
+                    <td>{{ machine.serial_number_of_machine }}</td>
+                    <td>
+                      {% include 'button/button.html' with object_class='model-of-equipment' object_id=model_of_equipment_id object_name=model_of_equipment_name %}
+                    </td>
+                    <td>
+                      {% include 'button/button.html' with object_class='model-of-engine' object_id=model_of_engine_id object_name=model_of_engine_name %}
+                    </td>
+                    <td>{{ machine.serial_number_of_engine }}</td>
+                    <td>
+                      {% include 'button/button.html' with object_class='model-of-transmission' object_id=model_of_transmission_id object_name=model_of_transmission_name %}
+                    </td>
+                    <td>{{ machine.serial_number_of_transmission }}</td>
+                    <td>
+                      {% include 'button/button.html' with object_class='model-of-drive-axle' object_id=model_of_drive_axle_id object_name=model_of_drive_axle_name %}
+                    </td>
+                    <td>{{ machine.serial_number_of_drive_axle }}</td>
+                    <td>
+                      {% include 'button/button.html' with object_class='model-of-steering-axle' object_id=model_of_steering_axle_id object_name=model_of_steering_axle_name %}
+                    </td>
+                    <td>{{ machine.serial_number_of_steering_axle }}</td>
+                </tr>
+            </table>
+        </div>
+        {% include 'modals/modal_info.html' %}
+    </div>
+    {% else %}
+    <div class="result-wrapper">
+        <span
+        >Поиск не производился или техника не найдена по указанному заводскому
+        номеру</span
+        >
+    </div>
+    {% endif %}
+</main>
+{% endblock content %}

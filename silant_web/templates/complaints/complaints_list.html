@@ -1,0 +1,88 @@
+{% extends 'base.html' %} 
+{% block title %} Мой силант {% endblock title %} 
+{% block content %}
+{% load static %}
+<main class="main">
+    <div class="result-wrapper">
+        <h1>Информация обо всех рекламациях ваших машин</h1>
+        {% include 'tabs.html' with active_tab='complaint' %}
+        {% if complaints %}
+        {% include 'forms/filter_form.html' %}
+        <div class="adaptive-table-wrapper">
+                <table class="adaptive-table">
+                    <thead>
+                        <tr>
+                            <th>Машина Зав. №</th>
+                            <th>Дата отказа ТО</th>
+                            <th>Наработка, м\час</th>
+                            <th>Узел отказа</th>
+                            <th>Описание отказа</th>
+                            <th>Способ</th>
+                            <th>Используемые части</th>
+                            <th>Дата восстановления</th>
+                            <th>Время простоя</th>
+                            <th>Сервисная компания</th>
+                            {% if can_update_complaint %}
+                            <th>Изменить</th>
+                            {% endif %}
+                            {% if can_delete_complaint %}
+                            <th>Удалить</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in filter.qs %}
+                        <tr>
+                            <td>{{ complaint.machine.serial_number_of_machine }}</td>
+                            <td>{{ complaint.date_of_refusal }}</td>
+                            <td>{{ complaint.operating_time }}</td>
+                            <td>
+                                {% include 'button/button.html' with object_class='failure-node-info' object_id=complaint.failure_node.id object_name=complaint.failure_node %}
+                            </td>
+                            <td>{{ complaint.description_of_failure }}</td>
+                            <td>
+                                {% include 'button/button.html' with object_class='recovery-method-info' object_id=complaint.recovery_method.id object_name=complaint.recovery_method %}
+                            </td>
+                            <td>{{ complaint.parts_used }}</td>
+                            <td>{{ complaint.recovery_date }}</td>
+                            <td>{{ complaint.equipment_downtime }}</td>
+                            <td>
+                                {% include 'button/button.html' with object_class='service-company-complaint-info' object_id=complaint.service_company.id object_name=complaint.service_company %}
+                            </td>
+                            {% if can_update_complaint %}
+                            <td>
+                                <a href="{% url 'complaint_update' complaint.id %}" class="edit-icon">
+                                    <img src="{% static 'img/edit.svg' %}" alt="Изменить" width="24" height="24">
+                                </a>
+                            </td>
+                            {% endif %}
+                            {% if can_delete_complaint %}
+                            <td>
+                                {% csrf_token %}
+                                <button class="delete-icon delete-complaint-btn" 
+                                    data-complaint-id="{{ complaint.id }}"
+                                    data-complaint-token="{{ csrf_token }}">
+                                    <img src="{% static 'img/delete.svg' %}" alt="Удалить" width="24" height="24">
+                                </button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+        </div>
+        {% include 'modals/modal_delete.html' with modal_title='Удалить Рекламацию' %}
+        {% include 'modals/modal_info.html' %}
+    </div>
+    {% else %}
+    <div class="result-wrapper">
+        <span class="info-if-doesnt-exists">Рекламаций нет в базе</span>
+    </div>
+    {% endif %}
+    {% if can_add_complaint %}
+        <button class="sign-button" id="create_complaint">Создать</button>
+    {% endif %}
+    <a href="{% url 'machine_list' %}" class="back-href" >Назад</a>
+
+</main>
+{% endblock content %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %} 
+{% block title %} Мой силант {% endblock title %} 
+{% block content %}
+{% load static %}
+<main class="main">
+    <div class="result-wrapper">
+        <h1>Информация обо всех заказах ТО для ваших машин</h1>
+        {% include 'tabs.html' with active_tab='maintenance' %}
+        {% if maintenances %}
+        {% include 'forms/filter_form.html' %}
+        <div class="adaptive-table-wrapper">
+            <table class="adaptive-table">
+                <thead>
+                    <tr>
+                        <th>Машина</th>
+                        <th>Вид ТО</th>
+                        <th>Дата проведения ТО</th>
+                        <th>Наработка, м\час</th>
+                        <th>№ заказ-наряда</th>
+                        <th>Дата заказ-наряда</th>
+                        <th>Организация проводившая ТО</th>
+                        {% if can_update_maintenance %}
+                        <th>Изменить</th>
+                        {% endif %}
+                        {% if can_delete_maintenance %}
+                        <th>Удалить</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for maintenance in filter.qs %}
+                    <tr>
+                        <td>{{ maintenance.machine.serial_number_of_machine }}</td>
+                        <td>
+                            {% include 'button/button.html' with object_class='maintenance-type-info' object_id=maintenance.maintenance_type.id object_name=maintenance.maintenance_type %}
+                        </td>
+                        <td>{{ maintenance.maintenance_date }}</td>
+                        <td>{{ maintenance.operating_time }}</td>
+                        <td>{{ maintenance.work_order_number }}</td>
+                        <td>{{ maintenance.work_order_date }}</td>
+                        <td>
+                            {% include 'button/button.html' with object_class='organization-info' object_id=maintenance.the_organization_that_carried_out_the_maintenance.id object_name=maintenance.the_organization_that_carried_out_the_maintenance %}
+                        </td>
+                        {% if can_update_maintenance %}
+                        <td>
+                            <a href="{% url 'maintenance_update' maintenance.id %}" class="edit-icon">
+                                <img src="{% static 'img/edit.svg' %}" alt="Изменить" width="24" height="24">
+                            </a>
+                        </td>
+                        {% endif %}
+                        {% if can_delete_maintenance %}
+                        <td>
+                            {% csrf_token %}
+                            <button class="delete-icon delete-maintenance-btn" 
+                            data-maintenance-id="{{ maintenance.id }}"
+                            data-maintenance-token="{{ csrf_token }}">
+                                <img src="{% static 'img/delete.svg' %}" alt="Удалить" width="24" height="24">
+                            </button>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'modals/modal_delete.html' with modal_title='Удалить ТО' %}
+        {% include 'modals/modal_info.html' %}
+    </div>
+    {% else %}
+    <div class="result-wrapper">
+        <span class="info-if-doesnt-exists">Заказов ТО нет в базе</span>
+    </div>
+    {% endif %}
+    {% if can_add_maintenance %}
+        <button class="sign-button" id="create_maintenance">Создать</button>
+    {% endif %}
+    <a href="{% url 'machine_list' %}" class="back-href">Назад</a>
+</main>
+{% endblock content %}

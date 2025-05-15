@@ -1,0 +1,5 @@
+{% extends 'base.html' %} 
+{% block title %} Мой силант {% endblock title %} 
+{% block content %}
+{% include 'forms/create_update_form.html' with title='рекламации' url='complaints_list' %}
+{% endblock content %}
