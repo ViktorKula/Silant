@@ -26,7 +26,7 @@ python manage.py runserver
 
 Logins & password:
 ```
-backend/logins.txt
+logins.txt
 ```
 
 
