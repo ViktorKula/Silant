@@ -2,7 +2,7 @@
   <img src="https://github.com/ViktorKula/Project_Silant/blob/main/frontend/src/img/Header/logo.module.png" width="250"/>
 </div>
 
-### Backend starting:
+### Starting:
 
 
 ```
