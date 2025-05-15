@@ -1,0 +1,186 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Поиск информации о машине{% endblock %}
+
+{% block content %}
+        <div class="content">
+            <p>Проверьте комплектацию и технические характеристики техники Силант:</p>
+            <form method="get" action="{% url 'index' %}" class="search-section">
+                {{ form.as_p }}
+                <button type="submit" id="searchBtn">Кнопка (поиск)</button>
+            </form>
+        </div>
+<div class="bk" style="margin-top: 25px;">
+<label>Результаты поиска</label>
+<div class="main-panel">
+    <div class="section" style="text-align: center;">
+                            {% if request.GET.query %}
+                        Информация о комплектации и технических характеристиках Вашей техники:
+                    {% else %}
+                        Здесь будет таблица с результатами поиска
+                    {% endif %}
+    </div>
+    <div class="section" style="display: {% if request.GET.query %}block{% else %}none{% endif %};">
+        <p style="text-align: center;">Таблица с данными</p>
+        <div class="result-section" id="resultSection">  <!-- Показываем блок, если есть параметр query -->
+            {% if results %}
+            <table class="details-table">
+                {% for result in results %}
+                <tr>
+                    <th>Заводской номер машины</th>
+                    <td data-model-type="machine">{{ result.machine_serial_number }}</td>
+                </tr>
+                <tr>
+                    <th>Модель техники</th>
+                    <td data-model-type="equipment" data-model-id="{{ result.model_of_equipment.id }}">{{ result.model_of_equipment }}</td>
+                </tr>
+                <tr>
+                    <th>Модель двигателя</th>
+                    <td data-model-type="engine" data-model-id="{{ result.engine_model.id }}">{{ result.engine_model }}</td>
+                </tr>
+                <tr>
+                    <th>Заводской номер двигателя</th>
+                    <td>{{ result.engine_serial_number }}</td>
+                </tr>
+                <tr>
+                    <th>Модель трансмиссии</th>
+                    <td data-model-type="transmission" data-model-id="{{ result.transmission_model.id }}">{{ result.transmission_model }}</td>
+                </tr>
+                <tr>
+                    <th>Заводской номер трансмиссии</th>
+                    <td>{{ result.transmission_serial_number }}</td>
+                </tr>
+                <tr>
+                    <th>Модель ведущего моста</th>
+                    <td data-model-type="driving_bridge" data-model-id="{{ result.model_of_the_drivig_bridge.id }}">{{ result.model_of_the_drivig_bridge }}</td>
+                </tr>
+                <tr>
+                    <th>Заводской номер ведущего моста</th>
+                    <td>{{ result.driving_bridge_serial_number }}</td>
+                </tr>
+                <tr>
+                    <th>Модель управляемого моста</th>
+                    <td data-model-type="controlled_bridge" data-model-id="{{ result.model_of_a_controlled_bridge.id }}">{{ result.model_of_a_controlled_bridge }}</td>
+                </tr>
+                <tr>
+                    <th>Заводской номер управляемого моста</th>
+                    <td>{{ result.controlled_bridge_serial_number }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p>Нет результатов запроса</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <form id="loginForm" method="post" action="{% url 'index' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="login">Логин</label>
+                    <input type="text" name="username" id="login" placeholder="Введите логин" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" name="password" id="password" placeholder="Введите пароль" required>
+                </div>
+                <div class="messages" style="color: red; font-size: 16px;"></div>
+                <div class="form-group">
+                    <button type="submit">Войти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="descriptionModal" class="modal">
+        <div class="modal-content">
+            <p id="descriptionText"></p>
+            <button onclick="document.getElementById('descriptionModal').style.display='none'">Закрыть</button>
+        </div>
+    </div>
+
+        <script>
+        // Добавляем обработчики событий для ячеек таблицы
+        document.querySelectorAll('.details-table td').forEach(function(cell) {
+            const modelId = cell.dataset.modelId; // Получаем ID из data-атрибута
+            const modelType = cell.dataset.modelType; // Получаем тип модели из data-атрибута
+
+            // Проверяем, есть ли ID и тип модели, чтобы определить, что ячейка имеет описание
+            if (modelId && modelType) {
+                cell.classList.add('description-cell'); // Добавляем класс для стиля
+                cell.addEventListener('click', function(event) {
+                    event.preventDefault(); // Предотвращаем стандартное поведение ссылки
+                    getDescriptionForCell(cell); // Получаем описание для ячейки
+                });
+            }
+        });
+
+        // Функция для получения описания в зависимости от содержимого ячейки
+        function getDescriptionForCell(cell) {
+            const modelId = cell.dataset.modelId; // Получаем ID из data-атрибута
+            const modelType = cell.dataset.modelType; // Получаем тип модели из data-атрибута
+
+            // Выполняем AJAX-запрос для получения описания
+            fetch(`/get_description/?model_type=${modelType}&model_id=${modelId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.description) {
+                        showDetails(data.description);
+                    } else {
+                        console.log('Описание отсутствует.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showDetails('Ошибка при получении описания.');
+                });
+        }
+
+        // Функция для отображения описания
+        function showDetails(description) {
+            if (description) {
+                document.getElementById('descriptionText').innerText = description;
+                document.getElementById('descriptionModal').style.display = 'flex';
+            }
+        }
+
+        // Закрытие модального окна при клике вне его
+        window.onclick = function(event) {
+            var modal = document.getElementById('authModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Обработка отправки формы
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+            // Отправляем данные формы с помощью Fetch API
+            var formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // Получаем CSRF-токен из формы
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Если вход успешен, перенаправляем на главную страницу
+                    window.location.href = "{% url 'main' %}";
+                } else {
+                    // Если вход не удался, показываем сообщение об ошибке
+                    return response.json().then(data => {
+                        document.querySelector('.messages').innerHTML = data.message; // Отображаем сообщение
+                    });
+                }
+            })
+            .catch(error => console.error('Ошибка:', error));
+        });
+    </script>
+{% endblock %}

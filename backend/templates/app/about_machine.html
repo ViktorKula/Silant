@@ -1,0 +1,375 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Информация о машине{% endblock %}
+
+{% block content %}
+        <label>Основная панель</label>
+        <div class="main-panel">
+            <div class="section inline">
+                <div class="section small">
+                    <p>Машина №{{ machine.id }}</p>
+                </div>
+                <div class="section small">
+                    <p>Заводской номер: {{ machine.machine_serial_number }}</p>
+                </div>
+            </div>
+            <div class="section small">
+                <p>Информация о проведённых ТО Вашей техники:</p>
+            </div>
+            <div class="section">
+                <p style="text-align: center;">Таблица с данными</p>
+                <div class="tabs">
+                    <button onclick="showTab('machines')">Общая информация</button>
+                    <button onclick="showTab('maintenances')">Техническое обслуживание</button>
+                    <button onclick="showTab('complaints')">Рекламации</button>
+                </div>
+
+                <div class="result-section">
+                    <div id="machines" style="display: none;" data-sort-order="asc">
+                        <div style="overflow-x: auto; white-space: nowrap;">
+                   <table class="details-table">
+                        <tr>
+                            <th>Модель техники</th>
+                            <td data-model-type="equipment" data-model-id="{{ machine.model_of_equipment.id }}">{{ machine.model_of_equipment }}</td>
+                        </tr>
+                        <tr>
+                            <th>Модель двигателя</th>
+                            <td data-model-type="engine" data-model-id="{{ machine.engine_model.id }}">{{ machine.engine_model }}</td>
+                        </tr>
+                        <tr>
+                            <th>Заводской номер двигателя</th>
+                            <td>{{ machine.engine_serial_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Модель трансмиссии</th>
+                            <td data-model-type="transmission" data-model-id="{{ machine.transmission_model.id }}">{{ machine.transmission_model }}</td>
+                        </tr>
+                        <tr>
+                            <th>Заводской номер трансмиссии</th>
+                            <td>{{ machine.transmission_serial_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Модель ведущего моста</th>
+                            <td data-model-type="driving_bridge" data-model-id="{{ machine.model_of_the_drivig_bridge.id }}">{{ machine.model_of_the_drivig_bridge }}</td>
+                        </tr>
+                        <tr>
+                            <th>Заводской номер ведущего моста</th>
+                            <td>{{ machine.driving_bridge_serial_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Модель управляемого моста</th>
+                            <td data-model-type="controlled_bridge" data-model-id="{{ machine.model_of_a_controlled_bridge.id }}">{{ machine.model_of_a_controlled_bridge }}</td>
+                        </tr>
+                        <tr>
+                            <th>Заводской номер управляемого моста</th>
+                            <td>{{ machine.controlled_bridge_serial_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Дата отгрузки с завода</th>
+                            <td>{{ machine.date_of_shipment|date:"d.m.Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Грузополучатель</th>
+                            <td>{{ machine.consignee }}</td>
+                        </tr>
+                        <tr>
+                            <th>Адрес поставки</th>
+                            <td>{{ machine.delivery_address }}</td>
+                        </tr>
+                        <tr>
+                            <th>Комплектация</th>
+                            <td>{{ machine.equipment }}</td>
+                        </tr>
+                        <tr>
+                            <th>Клиент</th>
+                            <td>{{ machine.client }}</td>
+                        </tr>
+                        <tr>
+                            <th>Сервисная компания</th>
+                            <td>{{ machine.service_company }}</td>
+                        </tr>
+                    </table>
+                            </div>
+                    </div>
+
+                    <div id="maintenances" style="display: none;">
+                        <div class="filter-section">
+                            <input type="text" id="filterMaintenanceType" placeholder="Фильтр по виду ТО..." onkeyup="filterMaintenances()">
+                            <input type="text" id="filterMachineSerial" placeholder="Фильтр по зав. номеру машины..." onkeyup="filterMaintenances()" hidden>
+                            <input type="text" id="filterServiceCompany" placeholder="Фильтр по сервисной компании..." onkeyup="filterMaintenances()">
+                        </div>
+                        <div style="overflow-x: auto; white-space: nowrap;">
+                        <table class="result-table" data-sort-order="asc">
+                            <tr>
+                                <th data-label="">Вид ТО</th>
+                                <th data-label="">Дата проведения ТО <span onclick="sortTable('maintenances', 2)">▲▼</span></th>
+                                <th data-label="">Наработка</th>
+                                <th data-label="">Номер заказ-наряда</th>
+                                <th data-label="">Дата заказ-наряда <span onclick="sortTable('maintenances', 5)"></span></th>
+                                <th data-label="">Сервисная компания</th>
+                            </tr>
+                            {% for maintenance in maintenances %}
+                            <tr>
+                                <td data-label="" data-model-type="maintenance_type" data-model-id="{{ maintenance.type_of_maintenance.id }}">{{ maintenance.type_of_maintenance }}</td>
+                                <td data-label="">{{ maintenance.date_of_maintenance|date:"d.m.Y" }}</td>
+                                <td data-label="">{{ maintenance.maintenance_development }}</td>
+                                <td data-label="">{{ maintenance.order_number }}</td>
+                                <td data-label="">{{ maintenance.order_date|date:"d.m.Y" }}</td>
+                                <td data-label="">{{ maintenance.service_company }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                            </div>
+                    </div>
+
+                    <div id="complaints" style="display: none;">
+                         <div class="filter-section">
+                            <input type="text" id="filterFailureNode" placeholder="Фильтр по узлу отказа..." onkeyup="filterComplaints()">
+                            <input type="text" id="filterRecoveryMethod" placeholder="Фильтр по способу восстановления..." onkeyup="filterComplaints()">
+                            <input type="text" id="filterServiceCompanyComplaints" placeholder="Фильтр по сервисной компании..." onkeyup="filterComplaints()">
+                        </div>
+                        <div style="overflow-x: auto; white-space: nowrap;">
+                    <table class="result-table" data-sort-order="asc">
+                        <tr>
+                            <th data-label="">Машина</th>
+                            <th data-label="">Дата отказа <span onclick="sortTable('complaints', 2)">▲▼</span></th>
+                            <th data-label="">Наработка</th>
+                            <th data-label="">Узел отказа</th>
+                            <th data-label="">Описание отказа</th>
+                            <th data-label="">Способ восстановления</th>
+                            <th data-label="">Используемые запчасти</th>
+                            <th data-label="">Дата восстановления <span onclick="sortTable('complaints', 8)">▲▼</span></th></th>
+                            <th data-label="">Время простоя техники</th>
+                            <th data-label="">Сервисная компания</th>
+                        </tr>
+                        {% for complaint in complaints %}
+                        <tr>
+                            <td><a href="{% url 'about_machine' complaint.machine.id %}">{{ complaint.machine.machine_serial_number }}</a></td>
+                            <td data-label="">{{ complaint.date_of_refusal|date:"d.m.Y" }}</td> <!-- Используем фильтр date -->
+                            <td data-label="">{{ complaint.complaints_development }}</td>
+                            <td data-model-type="failure_node" data-model-id="{{ complaint.failure_node.id }}">{{ complaint.failure_node }}</td>
+                            <td data-label="">{{ complaint.description_of_the_failure }}</td>
+                            <td data-model-type="recovery_method" data-model-id="{{ complaint.recovery_method.id }}">{{ complaint.recovery_method }}</td>
+                            <td data-label="">{{ complaint.used_spare_parts }}</td>
+                            <td data-label="">{{ complaint.date_of_restoration|date:"d.m.Y" }}</td> <!-- Используем фильтр date -->
+                            <td data-label="">{{ complaint.machine_downtime }}</td>
+                            <td data-model-type="service_company" data-model-id="{{ complaint.service_company.id }}">{{ complaint.service_company }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                            </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <form>
+                <div class="form-group">
+                    <label for="login">Логин</label>
+                    <input type="text" id="login" placeholder="Введите логин">
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" placeholder="Введите пароль">
+                </div>
+                <div class="form-group">
+                    <button type="submit">Войти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="descriptionModal" class="modal">
+        <div class="modal-content">
+            <p id="descriptionText"></p>
+            <button onclick="document.getElementById('descriptionModal').style.display='none'">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        // Функция для отображения описания
+        function showDetails(description) {
+            if (description) {
+                document.getElementById('descriptionText').innerText = description;
+                document.getElementById('descriptionModal').style.display = 'flex';
+            }
+        }
+
+        // Добавляем обработчики событий для ячеек таблицы
+        document.querySelectorAll('.result-table td, .details-table td').forEach(function(cell) {
+            const modelId = cell.dataset.modelId; // Получаем ID из data-атрибута
+            const modelType = cell.dataset.modelType; // Получаем тип модели из data-атрибута
+
+            // Проверяем, есть ли ID и тип модели, чтобы определить, что ячейка имеет описание
+            if (modelId && modelType) {
+                cell.classList.add('description-cell'); // Добавляем класс для стиля
+                cell.addEventListener('click', function() {
+                    getDescriptionForCell(cell); // Получаем описание для ячейки
+                });
+            }
+        });
+
+        // Функция для получения описания в зависимости от содержимого ячейки
+        function getDescriptionForCell(cell) {
+            const modelId = cell.dataset.modelId; // Получаем ID из data-атрибута
+            const modelType = cell.dataset.modelType; // Получаем тип модели из data-атрибута
+
+            // Выполняем AJAX-запрос для получения описания
+    fetch(`/get_description/?model_type=${modelType}&model_id=${modelId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.description) {
+                showDetails(data.description);
+            } else {
+                console.log('Описание отсутствует.');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showDetails('Ошибка при получении описания.');
+        });
+}
+
+        // Функция для отображения выбранного таба
+            function showTab(tabName) {
+                document.getElementById('machines').style.display = 'none';
+                document.getElementById('maintenances').style.display = 'none';
+                document.getElementById('complaints').style.display = 'none';
+
+                // Отображаем выбранную таблицу
+                document.getElementById(tabName).style.display = 'block';
+            }
+
+            // По умолчанию показываем первую таблицу
+            showTab('machines');
+
+
+        // Close the modal when clicking outside of it
+        window.onclick = function(event) {
+            var modal = document.getElementById('authModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+         function filterMachines() {
+        const modelFilter = document.getElementById('filterMachineModel').value.toLowerCase();
+        const engineFilter = document.getElementById('filterEngineModel').value.toLowerCase();
+        const transmissionFilter = document.getElementById('filterTransmissionModel').value.toLowerCase();
+        const drivingBridgeFilter = document.getElementById('filterDrivingBridgeModel').value.toLowerCase();
+        const controlledBridgeFilter = document.getElementById('filterControlledBridgeModel').value.toLowerCase();
+
+        const table = document.querySelector('#machines .result-table');
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) { // Начинаем с 1, чтобы пропустить заголовок
+            const cells = rows[i].getElementsByTagName("td");
+            let rowVisible = true;
+
+            if (cells[1].innerText.toLowerCase().indexOf(modelFilter) === -1) {
+                rowVisible = false;
+            }
+            if (cells[2].innerText.toLowerCase().indexOf(engineFilter) === -1) {
+                rowVisible = false;
+            }
+            if (cells[4].innerText.toLowerCase().indexOf(transmissionFilter) === -1) {
+                rowVisible = false;
+            }
+            if (cells[6].innerText.toLowerCase().indexOf(drivingBridgeFilter) === -1) {
+                rowVisible = false;
+            }
+            if (cells[8].innerText.toLowerCase().indexOf(controlledBridgeFilter) === -1) {
+                rowVisible = false;
+            }
+
+            rows[i].style.display = rowVisible ? "" : "none"; // Показываем или скрываем строку
+        }
+    }
+
+    function filterMaintenances() {
+        const typeFilter = document.getElementById('filterMaintenanceType').value.toLowerCase();
+        const serialFilter = document.getElementById('filterMachineSerial').value.toLowerCase();
+        const serviceFilter = document.getElementById('filterServiceCompany').value.toLowerCase();
+
+        const table = document.querySelector('#maintenances .result-table');
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) { // Начинаем с 1, чтобы пропустить заголовок
+            const cells = rows[i].getElementsByTagName("td");
+            let rowVisible = true;
+
+            // Проверяем фильтры
+            if (cells[0].innerText.toLowerCase().indexOf(typeFilter) === -1) {
+                rowVisible = false;
+            }
+            if (cells[1].innerText.toLowerCase().indexOf(serialFilter) === -1) {
+                rowVisible = false;
+            }
+            if (cells[5].innerText.toLowerCase().indexOf(serviceFilter) === -1) {
+                rowVisible = false;
+            }
+
+            rows[i].style.display = rowVisible ? "" : "none"; // Показываем или скрываем строку
+        }
+    }
+
+    function filterComplaints() {
+        const failureNodeFilter = document.getElementById('filterFailureNode').value.toLowerCase();
+        const recoveryMethodFilter = document.getElementById('filterRecoveryMethod').value.toLowerCase();
+        const serviceFilter = document.getElementById('filterServiceCompanyComplaints').value.toLowerCase();
+
+        const table = document.querySelector('#complaints .result-table');
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) { // Начинаем с 1, чтобы пропустить заголовок
+            const cells = rows[i].getElementsByTagName("td");
+            let rowVisible = true;
+
+            if (cells[3].innerText.toLowerCase().indexOf(failureNodeFilter) === -1) {
+                rowVisible = false;
+            }
+            if (cells[5].innerText.toLowerCase().indexOf(recoveryMethodFilter) === -1) {
+                rowVisible = false;
+            }
+            if (cells[9].innerText.toLowerCase().indexOf(serviceFilter) === -1) {
+                rowVisible = false;
+            }
+
+            rows[i].style.display = rowVisible ? "" : "none"; // Показываем или скрываем строку
+        }
+    }
+
+    function sortTable(tabName, columnIndex) {
+        const table = document.querySelector(`#${tabName} .result-table`);
+        const rows = Array.from(table.rows).slice(1); // Получаем все строки, кроме заголовка
+        const isAscending = table.getAttribute('data-sort-order') === 'asc'; // Проверяем текущее направление сортировки
+
+        // Сортируем строки
+        rows.sort((a, b) => {
+            const cellA = a.cells[columnIndex].innerText.trim();
+            const cellB = b.cells[columnIndex].innerText.trim();
+
+            // Сравниваем значения в зависимости от типа данных
+            if (columnIndex === 2 || columnIndex === 5 || columnIndex === 1) { // Даты
+                const dateA = new Date(cellA.split('.').reverse().join('-')); // Преобразуем в формат YYYY-MM-DD
+                const dateB = new Date(cellB.split('.').reverse().join('-'));
+                return isAscending ? dateA - dateB : dateB - dateA; // Сортируем по возрастанию или убыванию
+            } else {
+                return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+            }
+        });
+
+        // Удаляем старые строки и добавляем отсортированные
+        rows.forEach(row => table.appendChild(row));
+
+        // Меняем направление сортировки
+        table.setAttribute('data-sort-order', isAscending ? 'desc' : 'asc');
+
+        // Поворачиваем стрелочку
+        const arrows = table.querySelectorAll('th span');
+        arrows.forEach(arrow => arrow.style.transform = 'rotate(0deg)'); // Сбрасываем поворот
+        arrows[columnIndex].style.transform = isAscending ? 'rotate(180deg)' : 'rotate(0deg)'; // Поворачиваем стрелочку
+    }
+    </script>
+{% endblock content %}
